@@ -6,22 +6,22 @@
             </div>
             <ul class="menu">
                 <li>
-                    <a href="Work">Work</a>
+                    <a href="#">Work</a>
                 </li>
                 <li>
-                    <a href="About">About</a>
+                    <a href="#">About</a>
                 </li>
                 <li>
-                    <a href="Services.php">Services</a>
+                    <a href="#">Services</a>
                 </li>
                 <li>
                     <a href="Index.php" class="active">Ideas</a>
                     </li>
                 <li>
-                    <a href="Careers.php">Careers</a>
+                    <a href="#">Careers</a>
                 </li>
                 <li>
-                    <a href="Contact.php">Contact</a>
+                    <a href="#">Contact</a>
                 </li>
             </ul>
         </div>
