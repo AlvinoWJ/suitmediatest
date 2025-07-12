@@ -1,40 +1,52 @@
 <?php
-error_reporting(E_ALL);
+// Aktifkan error (saat development)
 ini_set('display_errors', 1);
-header("Content-Type: application/json");
+error_reporting(E_ALL);
 
+// Ambil parameter dari URL frontend
 $page = $_GET['page'] ?? 1;
 $size = $_GET['size'] ?? 10;
 $sort = $_GET['sort'] ?? '-published_at';
 
-$url = "https://suitmedia-backend.suitdev.com/api/ideas"
-     . "?page[number]=" . urlencode($page)
-     . "&page[size]=" . urlencode($size)
-     . "&append[]=small_image"
-     . "&append[]=medium_image"
-     . "&sort=" . urlencode($sort);
+// Bangun query parameter sesuai kebutuhan API
+$queryParams = http_build_query([
+    'page[number]' => $page,
+    'page[size]'   => $size,
+    'append'       => ['small_image', 'medium_image'],
+    'sort'         => $sort
+]);
+
+// API URL
+$apiUrl = "https://suitmedia-backend.suitdev.com/api/ideas?$queryParams";
 
 // Inisialisasi cURL
 $ch = curl_init();
-
-// Set opsi cURL
-curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_URL, $apiUrl);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    'Accept: application/json',
-    'User-Agent: Suitmedia-Client' // Tambahan penting
-]);
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+curl_setopt($ch, CURLOPT_TIMEOUT, 10);
 
-// Eksekusi dan tangkap respons
+// Eksekusi request
 $response = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-// Tangani error
+// Jika ada error di cURL
 if (curl_errno($ch)) {
     http_response_code(500);
-    echo json_encode(["error" => curl_error($ch)]);
+    echo json_encode(['error' => curl_error($ch)]);
     curl_close($ch);
     exit;
 }
 
 curl_close($ch);
+
+// Validasi response
+if ($httpCode !== 200 || empty($response)) {
+    http_response_code($httpCode);
+    echo json_encode(['error' => "Gagal mengambil data dari API (HTTP $httpCode)"]);
+    exit;
+}
+
+// Berhasil
+header('Content-Type: application/json');
 echo $response;
