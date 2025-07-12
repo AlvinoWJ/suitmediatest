@@ -8,6 +8,7 @@ let perPage = parseInt(localStorage.getItem("perPage")) || +perPageSelect.value;
 let currentPage = parseInt(localStorage.getItem("currentPage")) || 1;
 let sortOption = localStorage.getItem("sortBy") || sortSelect.value;
 let apiSort = sortOption === "newest" ? "-published_at" : "published_at";
+sortSelect.value = sortOption;
 
 perPageSelect.value = perPage;
 sortSelect.value = sortOption;
@@ -19,19 +20,11 @@ async function fetchPosts() {
 
   const url = `proxy.php?page=${currentPage}&size=${perPage}&sort=${apiSort}`;
 
-  try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-    const response = await res.json();
-    console.log("API response:", response);
-    return response;
-  } catch (error) {
-    console.error("Fetch error:", error);
-    showingInfo.textContent = `❌ Failed to fetch posts. Try again later.`;
-    postContainer.innerHTML = `<p class="error">Something went wrong. Please try again later.</p>`;
-    pagination.innerHTML = "";
-    return { data: [], meta: { total: 0 } };
-  }
+  const res = await fetch(url);
+  const response = await res.json();
+
+  console.log("API response:", response);
+  return response;
 }
 
 async function renderPosts() {
@@ -40,17 +33,13 @@ async function renderPosts() {
   const total = response.meta.total;
 
   const start = (currentPage - 1) * perPage + 1;
-  const end = posts.length > 0 ? start + posts.length - 1 : 0;
+  const end = start + posts.length - 1;
 
   showingInfo.textContent = `Showing ${start}–${end} of ${total}`;
 
   postContainer.innerHTML = posts
     .map((post) => {
-      const imageUrl =
-        post.medium_image?.[0]?.url ||
-        post.small_image?.[0]?.url ||
-        "https://via.placeholder.com/300x200?text=No+Image";
-
+      const imageUrl = post.medium_image?.[0]?.url || "";
       return `
         <div class="card">
           <img src="${imageUrl}" alt="${post.title}" loading="lazy">
@@ -104,7 +93,6 @@ const navbar = document.querySelector(".navbar");
 window.addEventListener("scroll", () => {
   const currentScrollPos = window.pageYOffset;
 
-  // Hilangkan navbar saat scroll ke bawah
   if (currentScrollPos > prevScrollPos) {
     navbar.classList.remove("visible");
     navbar.classList.add("hidden");
@@ -113,7 +101,6 @@ window.addEventListener("scroll", () => {
     navbar.classList.add("visible");
   }
 
-  // Ubah background jadi solid jika di atas
   if (currentScrollPos === 0) {
     navbar.classList.remove("transparent");
     navbar.classList.add("solid");

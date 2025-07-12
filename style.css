@@ -209,6 +209,7 @@
   overflow: hidden;
   background: white;
   padding: 10px;
+  height: 250px;
 }
 
 .card img {
